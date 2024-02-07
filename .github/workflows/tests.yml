@@ -1,4 +1,4 @@
-name: Run Tests on Pull Request
+name: Database Health Check
 
 on:
   pull_request:
@@ -6,8 +6,19 @@ on:
       - main
 
 jobs:
-  build:
+  health_check:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14.10
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: csye6225
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: Checkout code
@@ -22,18 +33,16 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest
+        run: pytest tests/
 
-      - name: Enable Merge Button
-        uses: actions/github-script@v4
-        with:
-          script: |
-            github.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              mergeable_state: 'success'
-            })
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Perform database health check
+        run: |
+          response=$(curl -sSf "http://localhost:8000/healthz")
+          if [[ $response == *"200"* ]]; then
+            echo "Database is healthy"
+            exit 0
+          else
+            echo "Database health check failed"
+            exit 1
+          fi
 

@@ -24,6 +24,12 @@ app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
+allowed_routes = {
+    "/v1/user/self": ["GET", "PUT"],
+    "/v1/user": ["POST"],
+    "/healthz": ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+}
+
 # Uncomment below code snippet later, this is the middleware to check for non configured URLS
 
 '''
@@ -43,17 +49,16 @@ app.add_middleware(MethodNotAllowedMiddleware)
 
 
 class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        allowed_methods = {
-            "/healthz": ["GET"],
-            "/v1/user/self": ["GET", "PUT"],
-            "/v1/user": ["POST"]
-        }
+    def __init__(self, app, allowed_routes):
+        super().__init__(app)
+        self.allowed_routes = allowed_routes
 
+    async def dispatch(self, request: Request, call_next):
+        # Check if the requested path and method are allowed
         path = request.url.path
         method = request.method
 
-        if path not in allowed_methods or method not in allowed_methods[path]:
+        if path in self.allowed_routes and method not in self.allowed_routes[path]:
             response_405 = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
             response_405.headers["Cache-Control"] = "no-cache"
             return response_405
@@ -61,7 +66,8 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-app.add_middleware(MethodNotAllowedMiddleware)
+app.add_middleware(MethodNotAllowedMiddleware, allowed_routes=allowed_routes)
+
 
 app.include_router(users.router)
 app.include_router(health_check.router)

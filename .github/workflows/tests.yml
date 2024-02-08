@@ -33,7 +33,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest tests/
+        run: pytest csye6225/tests
 
       - name: Perform database health check
         run: |

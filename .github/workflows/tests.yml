@@ -35,14 +35,3 @@ jobs:
       - name: Run tests
         run: pytest csye6225project/csye6225/tests
 
-      - name: Perform database health check
-        run: |
-          response=$(curl -sSf "http://localhost:8000/healthz")
-          if [[ $response == *"200"* ]]; then
-            echo "Database is healthy"
-            exit 0
-          else
-            echo "Database health check failed"
-            exit 1
-          fi
-

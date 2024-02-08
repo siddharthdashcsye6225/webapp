@@ -20,7 +20,7 @@ from typing import Annotated
 
 router = APIRouter(tags=['authenticated'])
 
-
+# Adding comment to test
 # Get back to this later, this function can't figure out which user details to fetch for
 
 @router.get('/v1/user/self', response_model=schemas.ResponseUser)

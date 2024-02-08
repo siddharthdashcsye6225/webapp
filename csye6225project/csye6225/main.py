@@ -24,6 +24,7 @@ app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
+
 allowed_routes = {
     "/v1/user/self": ["GET", "PUT"],
     "/v1/user": ["POST"],
@@ -49,6 +50,7 @@ app.add_middleware(MethodNotAllowedMiddleware)
 
 
 class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
+
     def __init__(self, app, allowed_routes):
         super().__init__(app)
         self.allowed_routes = allowed_routes
@@ -59,6 +61,7 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
         method = request.method
 
         if path in self.allowed_routes and method not in self.allowed_routes[path]:
+
             response_405 = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
             response_405.headers["Cache-Control"] = "no-cache"
             return response_405
@@ -66,7 +69,9 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+
 app.add_middleware(MethodNotAllowedMiddleware, allowed_routes=allowed_routes)
+
 
 
 app.include_router(users.router)

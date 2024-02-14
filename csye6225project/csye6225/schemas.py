@@ -43,7 +43,6 @@ class UpdateUserData(BaseModel):
         # Ensure that extra fields are not allowed
         extra = "forbid"
 
-
     @classmethod
     def from_orm(cls, obj):
         return cls(

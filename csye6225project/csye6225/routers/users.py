@@ -13,13 +13,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import utils
 import models
 from database import engine, SessionLocal, get_db
+
 from sqlalchemy import create_engine, exc, text, false
 from sqlalchemy.orm import Session
 import schemas
 from typing import Annotated
 
 router = APIRouter(tags=['authenticated'])
-
 
 # Adding comment to test
 # Get back to this later, this function can't figure out which user details to fetch for

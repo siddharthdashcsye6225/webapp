@@ -4,6 +4,7 @@ from urllib import response
 
 from fastapi import FastAPI, Body, Depends, HTTPException, Request
 import psycopg2
+from fastapi.exceptions import RequestValidationError
 from psycopg2._psycopg import IntegrityError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -18,11 +19,20 @@ from database import engine, SessionLocal, get_db
 from sqlalchemy import create_engine, exc, text
 from sqlalchemy.orm import Session
 import schemas
-from routers import users,health_check
+from routers import users, health_check
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
+
+
+# checking for all request bodies incoming, if they don't match the body format as defined
+# by pydantic schemas then they will return a 400 instead of 422
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    #error_msg = {"detail": "Validation error", "errors": exc.errors()}
+    raise HTTPException(status_code=400)
+
 
 allowed_routes = {
     "/v1/user/self": ["GET", "PUT"],
@@ -68,10 +78,5 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(MethodNotAllowedMiddleware, allowed_routes=allowed_routes)
 
-
 app.include_router(users.router)
 app.include_router(health_check.router)
-
-
-
-

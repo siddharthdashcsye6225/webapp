@@ -83,7 +83,6 @@ def healthz(request: Request, db: Session = Depends(get_db)):
     return response
 
 
-
 # USER CREATION
 #
 # FOR NOW THIS CODE IGNORES RANDOM FIELD AND CREATES USERS ANYWAYS

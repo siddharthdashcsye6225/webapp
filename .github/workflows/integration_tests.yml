@@ -1,4 +1,4 @@
-name: Database Health Check
+name: Integration Tests
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  health_check:
-    name: testing
+  integration_tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
 
     services:
@@ -15,7 +15,7 @@ jobs:
         image: postgres:14.10
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: csye6225
         ports:
           - 5432:5432
@@ -33,6 +33,5 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run tests
-        run: pytest csye6225project/csye6225/tests/test_basic.py
-
+      - name: Run integration tests
+        run: pytest csye6225project/csye6225/tests/test_integration.py

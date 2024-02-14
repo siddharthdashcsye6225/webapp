@@ -20,19 +20,18 @@ from sqlalchemy import create_engine, exc, text
 from sqlalchemy.orm import Session
 import schemas
 from routers import users, health_check
-from routers import users,health_check
+from routers import users, health_check
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
 
-
 # checking for all request bodies incoming, if they don't match the body format as defined
 # by pydantic schemas then they will return a 400 instead of 422
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    #error_msg = {"detail": "Validation error", "errors": exc.errors()}
+    # error_msg = {"detail": "Validation error", "errors": exc.errors()}
     raise HTTPException(status_code=400)
 
 
@@ -41,7 +40,6 @@ allowed_routes = {
     "/v1/user": ["POST"],
     "/healthz": ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
 }
-
 
 # Uncomment below code snippet later, this is the middleware to check for non configured URLS
 
@@ -79,8 +77,6 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-
 app.add_middleware(MethodNotAllowedMiddleware, allowed_routes=allowed_routes)
 app.include_router(users.router)
 app.include_router(health_check.router)
-

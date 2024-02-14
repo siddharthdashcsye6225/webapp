@@ -13,7 +13,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import utils
 import models
 from database import engine, SessionLocal, get_db
-from sqlalchemy import create_engine, exc, text
+
+from sqlalchemy import create_engine, exc, text, false
 from sqlalchemy.orm import Session
 import schemas
 from typing import Annotated
@@ -46,18 +47,33 @@ def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
 
 
 @router.put("/v1/user/self", status_code=204)
-def update_user(updateUser: schemas.UserCreate,
+def update_user(updateUser: schemas.UpdateUserData,
                 current_user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
                 db: Session = Depends(get_db)):
     try:
+
+        # Validate the request body against the Pydantic schema
+        updateUser_data = updateUser.model_dump()
+        schemas.UpdateUserData(**updateUser_data)
+
+        invalid_fields = set(updateUser.model_dump().keys()) - {"first_name", "last_name", "password", "username"}
+        if invalid_fields:
+            raise HTTPException(status_code=400, detail=f"Invalid fields provided: {', '.join(invalid_fields)}")
+
         if updateUser.username == current_user.username:
             utils.user_service.update_user(updateUser=updateUser, db=db)
         else:
-            raise HTTPException(status_code=403,
-                                detail=f"User with {current_user.username} not authorized to perform requested action")
+            raise HTTPException(status_code=400,
+                                detail=f"User with {current_user.username} not authorized to perform requested action "
+                                       f"/ not allowed to change username")
 
     except utils.DataNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+    except ValidationError as e:
+        raise HTTPException(status_code=400, detail="Invalid request body")
+
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail='Internal Server Error')
+        raise HTTPException(status_code=400)
+

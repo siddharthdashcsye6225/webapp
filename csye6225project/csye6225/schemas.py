@@ -32,6 +32,17 @@ class ResponseUser(BaseModel):
     class Config:
         orm_mode = True
 
+
+class UpdateUserData(BaseModel):
+    first_name: str
+    last_name: str
+    password: str
+    username: EmailStr
+
+    class Config:
+        # Ensure that extra fields are not allowed
+        extra = "forbid"
+
     @classmethod
     def from_orm(cls, obj):
         return cls(

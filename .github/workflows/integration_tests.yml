@@ -10,20 +10,23 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:14.10
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: csye6225
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB: csye6225
+
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install PostgreSQL and dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+            sudo service postgresql start
+            sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '${{ env.POSTGRES_PASSWORD }}';"
+            sudo -u postgres createdb csye6225    
 
       - name: Set up Python
         uses: actions/setup-python@v2

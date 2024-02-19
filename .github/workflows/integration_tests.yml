@@ -34,7 +34,9 @@ jobs:
           python-version: 3.12.0
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+            pip install -r requirements.txt
+            sudo service postgresql stop 
 
       - name: Run integration tests
         run: pytest csye6225project/csye6225/tests/test_integration.py

@@ -19,6 +19,17 @@ jobs:
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get update && sudo apt-get install packer
 
+      - name: Install and Configure gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          project_id: dev-siddharth-dash-csye6225
+          service_account_email: image-builder@dev-siddharth-dash-csye6225.iam.gserviceaccount.com
+
+      - name: Install Packer Google Compute Engine Plugin
+        run: |
+          packer plugins install github.com/hashicorp/googlecompute
+
       - name: Check Packer Template Format
         run: |
           packer fmt -check packer/packer-template.pkr.hcl

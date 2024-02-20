@@ -10,7 +10,7 @@ client = TestClient(app)
 
 def test_user_lifecycle():
     # Generate Basic authentication token
-    username = "johndoe111@example.com"
+    username = "johndoe1111@example.com"
     password = "password123"
     credentials = f"{username}:{password}"
     encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
@@ -20,7 +20,7 @@ def test_user_lifecycle():
     new_user_data = {
         "first_name": "John",
         "last_name": "Doe",
-        "username": "johndoe111@example.com",
+        "username": "johndoe1111@example.com",
         "password": "password123"
     }
     response = client.post("/v1/user", json=new_user_data)
@@ -44,7 +44,7 @@ def test_user_lifecycle():
         "first_name": "Jane",
         "last_name": "Smith",
         "password": "newpassword123",
-        "username": "johndoe111@example.com"
+        "username": "johndoe1111@example.com"
     }
     response = client.put("/v1/user/self", json=updated_user_data, headers={"Authorization": auth_header})
     assert response.status_code == 204

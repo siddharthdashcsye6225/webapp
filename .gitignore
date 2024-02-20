@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 
+#json file for gcp auth
+dev-siddharth-dash-csye6225-a3631f1ff719.json
+
 # Distribution / packaging
 .Python
 build/

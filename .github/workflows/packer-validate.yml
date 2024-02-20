@@ -21,7 +21,7 @@ jobs:
 
       - name: Check Packer Template Format
         run: |
-          packer fmt -check .
+          packer fmt -check packer/packer-template.pkr.json
           if [ $? -eq 1 ]; then
             echo "Packer template format is incorrect. Please run 'packer fmt' to format it properly."
             exit 1

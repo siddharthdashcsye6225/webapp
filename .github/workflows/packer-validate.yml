@@ -1,0 +1,36 @@
+name: Packer CI - PR Status Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  packer-check:
+    name: Packer Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+
+      - name: Check Packer Template Format
+        run: |
+          packer fmt -check .
+          if [ $? -eq 1 ]; then
+            echo "Packer template format is incorrect. Please run 'packer fmt' to format it properly."
+            exit 1
+          fi
+
+      - name: Validate Packer Template
+        run: |
+          packer validate .
+          if [ $? -ne 0 ]; then
+            echo "Packer template validation failed. Please check the template for errors."
+            exit 1
+          fi

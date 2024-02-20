@@ -12,6 +12,6 @@ build {
   ]
 
   provisioner "shell" {
-    script = "scripts/install_dependencies.sh"
+    script = "packer/scripts/install_dependencies.sh"
   }
 }

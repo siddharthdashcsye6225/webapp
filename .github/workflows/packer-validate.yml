@@ -13,6 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up environment variable
+        run: echo "::set-env name=GCP_CREDENTIALS::${{ secrets.GCP_CREDENTIALS }}"
+
+
       - name: Install Packer
         run: |
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -

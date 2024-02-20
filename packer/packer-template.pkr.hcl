@@ -1,5 +1,5 @@
 source "googlecompute" "custom_image" {
-  account_file        = "${secrets.GCP_CREDENTIALS}"
+  account_file        = "${env.GCP_CREDENTIALS}"
   project_id          = "dev-siddharth-dash-csye6225"
   source_image_family = "centos-stream-8"
   zone                = "us-central1-a"

@@ -33,7 +33,7 @@ jobs:
 
       - name: Check Packer Template Format
         run: |
-          packer fmt -check packer/packer-template.pkr.hcl
+          packer fmt -check packer/packer.pkr.hcl
           if [ $? -eq 1 ]; then
             echo "Packer template format is incorrect. Please run 'packer fmt' to format it properly."
             exit 1
@@ -41,7 +41,7 @@ jobs:
 
       - name: Validate Packer Template
         run: |
-          packer validate packer/packer-template.pkr.hcl
+          packer validate packer/packer.pkr.hcl
           if [ $? -ne 0 ]; then
             echo "Packer template validation failed. Please check the template for errors."
             exit 1

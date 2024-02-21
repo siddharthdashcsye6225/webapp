@@ -6,7 +6,7 @@ on:
 
 jobs:
   integration_tests:
-    name: Integration Tests - Post Merge
+    name: Integration Tests and Packer Build - Post Merge
     runs-on: ubuntu-latest
 
     if: github.event.pull_request.merged == true

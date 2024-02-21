@@ -41,7 +41,7 @@ jobs:
 
       - name: Build artifact
         run: pip install starlette-deployment
-            starlette-deployment build csyeproject6225/csye6225/mai:app
+            starlette-deployment build csyeproject6225.csye6225.main:app
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,84 @@
+name: Packer Build
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  integration_tests:
+    name: Integration Tests - Post Merge
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged == true
+
+    env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB: csye6225
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install PostgreSQL and dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+            sudo service postgresql start
+            sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '${{ env.POSTGRES_PASSWORD }}';"
+            sudo -u postgres createdb csye6225    
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.0
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run integration tests
+        run: pytest csye6225project/csye6225/tests/test_integration.py
+
+      - name: Build Project Artifact
+        run: |
+          tar -czf dist/webapp-1.0.0.tar.gz webapp
+        working-directory: ${{ github.workspace }}
+
+      - name: Install Packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+
+      - name: Authenticate with gcloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install Packer Google Compute Engine Plugin
+        run: |
+          packer plugins install github.com/hashicorp/googlecompute
+
+      - name: Check Packer Template Format
+        run: |
+          packer fmt -check packer/packer.pkr.hcl
+          if [ $? -eq 1 ]; then
+            echo "Packer template format is incorrect. Please run 'packer fmt' to format it properly."
+            exit 1
+          fi
+
+      - name: Validate Packer Template
+        run: |
+          packer validate packer/packer.pkr.hcl
+          if [ $? -ne 0 ]; then
+            echo "Packer template validation failed. Please check the template for errors."
+            exit 1
+          fi
+
+      - name: Build Image with Packer Template
+        run: | 
+          cd packer
+          packer build packer.pkr.hcl 

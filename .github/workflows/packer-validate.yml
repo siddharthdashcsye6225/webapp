@@ -46,3 +46,5 @@ jobs:
             echo "Packer template validation failed. Please check the template for errors."
             exit 1
           fi
+      - name: Check contents of target directory
+        run: ls -R target   

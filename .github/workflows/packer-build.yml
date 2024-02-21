@@ -39,10 +39,14 @@ jobs:
       - name: Run integration tests
         run: pytest csye6225project/csye6225/tests/test_integration.py
 
-      - name: Build Project Artifact
-        run: |
-          tar -czf dist/webapp-1.0.0.tar.gz webapp
-        working-directory: ${{ github.workspace }}
+      - name: Build artifact
+        run: starlette-deployment build webapp/csyeproject6225/csye6225/main.py:app
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-package
+          path: build/production-package.tar.gz
 
       - name: Install Packer
         run: |
@@ -82,3 +86,7 @@ jobs:
         run: | 
           cd packer
           packer build packer.pkr.hcl 
+
+build/production-package:
+  tar:
+    gz:

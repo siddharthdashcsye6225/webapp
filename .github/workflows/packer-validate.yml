@@ -13,16 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build Project Artifact
-        run: |
-          tar -czf dist/webapp-1.0.0.tar.gz webapp
-        working-directory: ${{ github.workspace }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.0
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build artifact
+        run: starlette-deployment build webapp/csyeproject6225/csye6225/main.py:app
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-package
+          path: build/production-package.tar.gz
 
       - name: Install Packer
         run: |
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update && sudo apt-get install packer
+          sudo apt-get update && sudo apt-get install packer -y
 
       - name: Authenticate with gcloud
         uses: google-github-actions/auth@v2
@@ -33,8 +45,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Install Packer Google Compute Engine Plugin
-        run: |
-          packer plugins install github.com/hashicorp/googlecompute
+        run: packer plugins install github.com/hashicorp/googlecompute
 
       - name: Check Packer Template Format
         run: |

@@ -54,7 +54,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "../dist/webapp-1.0.0.tar.gz"
+    source      = "../build/production-package.tar.gz"
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 

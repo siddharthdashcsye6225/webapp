@@ -58,7 +58,7 @@ build {
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 
-   provisioner "file" {
+  provisioner "file" {
     source      = "packer/pg_hga.conf"
     destination = "/tmp/pg_hba.conf.bak"
   }

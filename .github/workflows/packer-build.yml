@@ -42,6 +42,7 @@ jobs:
 
       - name: Create artifact
         run: |
+          pwd
           tar -czf project-artifact.tar.gz .
           mkdir build
           mv project-artifact.tar.gz build

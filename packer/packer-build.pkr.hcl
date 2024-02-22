@@ -65,7 +65,7 @@ build {
       "sudo mv /tmp/webservice.service /etc/systemd/system/",
       "sudo cp /tmp/webapp-1.0.0.tar.gz /opt/csye6225/",
       "sudo tar -xzf /opt/csye6225/webapp-1.0.0.tar.gz -C /opt/csye6225/",
-      "sudo mv webapp-1.0.0 webapp",
+      "sudo mv /opt/csye6225/webapp-1.0.0 /opt/csye6225/webapp",
       "sudo ls -ltr /opt/csye6225",
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo yum install -y python39",

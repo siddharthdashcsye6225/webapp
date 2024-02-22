@@ -92,8 +92,4 @@ jobs:
       - name: Build Image with Packer Template
         run: | 
           cd packer
-          packer build packer.pkr.hcl 
-
-build/production-package:
-  tar:
-    gz:
+          packer build packer.pkr.hcl

@@ -58,6 +58,11 @@ build {
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 
+   provisioner "file" {
+    source      = "packer/pg_hga.conf"
+    destination = "/tmp/pg_hba.conf.bak"
+  }
+
   provisioner "shell" {
     inline = [
       "sudo groupadd -f csye6225",
@@ -78,6 +83,8 @@ build {
       "sudo postgresql-setup initdb",
       "sudo systemctl start postgresql",
       "sudo systemctl enable postgresql",
+      "sudo mv /tmp/pg_hba.conf.bak /var/lib/pgsql/data/pg_hba.conf",
+      "sudo systemctl restart postgresql",
       "sudo yum install -y postgresql-devel --nobest",
       "which pg_config",
       "pg_config --version",

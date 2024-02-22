@@ -94,6 +94,6 @@ jobs:
       - name: Build Image with Packer Template
         run: | 
           cd packer
-          packer build packer.pkr.hcl
+          packer build packer-build.pkr.hcl
 
 #test

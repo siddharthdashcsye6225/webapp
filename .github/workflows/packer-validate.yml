@@ -27,7 +27,7 @@ jobs:
           ls -ltr
           pwd
           ls -ltr /home/runner/work/webapp/webapp
-          tar -czf project-artifact.tar.gz .
+          tar -czf project-artifact.tar.gz -C /home/runner/work/webapp .
           mkdir build
           mv project-artifact.tar.gz build
 

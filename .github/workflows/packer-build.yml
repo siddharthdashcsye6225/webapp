@@ -83,6 +83,8 @@ jobs:
 
       - name: Validate Packer Template
         run: |
+          pwd
+          ls -ltr
           packer validate packer/packer.pkr.hcl
           if [ $? -ne 0 ]; then
             echo "Packer template validation failed. Please check the template for errors."

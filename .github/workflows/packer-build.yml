@@ -94,6 +94,6 @@ jobs:
       - name: Build Image with Packer Template
         run: | 
           pwd
-          packer build packer/packer-build.pkr.hcl
+          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl
 
 #test

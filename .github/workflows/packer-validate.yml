@@ -21,18 +21,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install starlette-deployment
 
-      - name: Build artifact
+      - name: Create artifact
         run: |
-          cd csye6225project/csye6225
-          starlette-deployment build main:app
+          tar -czf project-artifact.tar.gz .
+          mkdir build
+          mv project-artifact.tar.gz build/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: production-package
-          path: build/production-package.tar.gz
+          path: build/project-artifact.tar.gz
 
       - name: Install Packer
         run: |

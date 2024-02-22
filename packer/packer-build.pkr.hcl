@@ -12,6 +12,11 @@ variable "project_id" {
   default = "dev-siddharth-dash-csye6225"
 }
 
+variable "postgres_password" {
+  type    = string
+  default = ""
+}
+
 variable "source_image" {
   type    = string
   default = "centos-stream-8-v20240110"
@@ -92,7 +97,7 @@ build {
       "export PG_CONFIG_PATH=$(find /usr -name pg_config | head -n 1)",
       "export PATH=$(dirname $PG_CONFIG_PATH):$PATH",
       "trap 'sudo journalctl -u postgresql.service > postgresql_logs.txt' EXIT",
-      "sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD 'password';\"",
+      "sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD '${var.postgres_password}';\"",
       "echo 'PostgreSQL password changed'",
       "sudo -u postgres createdb csye6225",
       "sudo python3.9 -m venv /opt/csye6225/webapp/venv",

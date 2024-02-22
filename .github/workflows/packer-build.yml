@@ -43,6 +43,7 @@ jobs:
       - name: Create artifact
         run: |
           pwd
+          ls -ltr /home/runner/work/webapp/webapp
           tar -czf project-artifact.tar.gz .
           mkdir build
           mv project-artifact.tar.gz build

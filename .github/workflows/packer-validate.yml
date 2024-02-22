@@ -24,10 +24,12 @@ jobs:
 
       - name: Create artifact
         run: |
+          ls -ltr
           pwd
+          ls -ltr /home/runner/work/webapp/webapp
           tar -czf project-artifact.tar.gz .
           mkdir build
-          mv project-artifact.tar.gz build/
+          mv project-artifact.tar.gz build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

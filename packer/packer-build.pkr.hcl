@@ -49,12 +49,12 @@ build {
   sources = ["sources.googlecompute.webapp"]
 
   provisioner "file" {
-    source      = "/packer/webservice.service"
+    source      = "packer/webservice.service"
     destination = "/tmp/webservice.service"
   }
 
   provisioner "file" {
-    source      = "/build/project-artifact.tar.gz"
+    source      = "build/project-artifact.tar.gz"
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 

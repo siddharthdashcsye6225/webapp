@@ -60,7 +60,7 @@ build {
 
 
   provisioner "file" {
-    source      = "packer/pg_hga.conf"
+    source      = "packer/pg_hba.conf"
     destination = "/tmp/pg_hba.conf.bak"
   }
 

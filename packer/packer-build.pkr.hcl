@@ -70,7 +70,6 @@ build {
       "sudo yum install -y python39",
       "sudo yum install -y python39-pip",
       "sudo yum install -y python3-devel",
-      "which psql",
       "sudo dnf install postgresql-server postgresql-contrib -y",
       "sudo yum install -y gcc make postgresql-devel --nobest",
       "sudo postgresql-setup initdb",

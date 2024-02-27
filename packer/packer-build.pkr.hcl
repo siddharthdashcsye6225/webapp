@@ -54,18 +54,18 @@ build {
   sources = ["sources.googlecompute.webapp"]
 
   provisioner "file" {
-    source      = "webservice.service"
+    source      = "packer/webservice.service"
     destination = "/tmp/webservice.service"
   }
 
   provisioner "file" {
-    source      = "dist/project-artifact.tar.gz"
+    source      = "build/project-artifact.tar.gz"
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 
 
   provisioner "file" {
-    source      = "pg_hba.conf"
+    source      = "packer/pg_hba.conf"
     destination = "/tmp/pg_hba.conf.bak"
   }
 

@@ -1,6 +1,7 @@
 [Unit]
 Description=Web Application
 After=network.target
+ConditionPathExists=/tmp/endofstartupscript.txt
 
 [Service]
 Type=simple

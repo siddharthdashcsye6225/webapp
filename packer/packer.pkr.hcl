@@ -8,7 +8,7 @@ packer {
 }
 
 variable "project_id" {
-  type    = string
+  type          = string
   default = "dev-siddharth-dash-csye6225"
 }
 

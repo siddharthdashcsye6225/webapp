@@ -13,7 +13,7 @@ variable "project_id" {
 }
 
 variable "postgres_password" {
-  type    = string
+  type           = string
   default = ""
 }
 

@@ -10,7 +10,7 @@ packer {
 variable "project_id" {
   type    = string
   default = "dev-siddharth-dash-csye6225"
-}
+
 
 variable "postgres_password" {
   type           = string

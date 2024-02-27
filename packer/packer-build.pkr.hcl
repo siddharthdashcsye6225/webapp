@@ -60,7 +60,7 @@ build {
 
   provisioner "file" {
     source      = "build/project-artifact.tar.gz"
-    destination = "/tmp/webapp-1.0.0.tar.gz"
+    destination = "webapp-1.0.0.tar.gz"
   }
 
 

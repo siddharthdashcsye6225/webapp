@@ -54,18 +54,18 @@ build {
   sources = ["sources.googlecompute.webapp"]
 
   provisioner "file" {
-    source      = "packer/webservice.service"
+    source      = "webservice.service"
     destination = "/tmp/webservice.service"
   }
 
   provisioner "file" {
-    source      = "build/project-artifact.tar.gz"
+    source      = "dist/project-artifact.tar.gz"
     destination = "/tmp/webapp-1.0.0.tar.gz"
   }
 
 
   provisioner "file" {
-    source      = "packer/pg_hba.conf"
+    source      = "pg_hba.conf"
     destination = "/tmp/pg_hba.conf.bak"
   }
 
@@ -86,20 +86,20 @@ build {
       "sudo yum install -y python3-devel",
       "sudo dnf install postgresql-server postgresql-contrib -y",
       "sudo yum install -y gcc make postgresql-devel --nobest",
-      "sudo postgresql-setup initdb",
-      "sudo systemctl start postgresql",
-      "sudo systemctl enable postgresql",
-      "sudo mv /tmp/pg_hba.conf.bak /var/lib/pgsql/data/pg_hba.conf",
-      "sudo systemctl restart postgresql",
+      #"sudo postgresql-setup initdb",
+      #"sudo systemctl start postgresql",
+      #"sudo systemctl enable postgresql",
+      #"sudo mv /tmp/pg_hba.conf.bak /var/lib/pgsql/data/pg_hba.conf",
+      #"sudo systemctl restart postgresql",
       "sudo yum install -y postgresql-devel --nobest",
       "which pg_config",
       "pg_config --version",
       "export PG_CONFIG_PATH=$(find /usr -name pg_config | head -n 1)",
       "export PATH=$(dirname $PG_CONFIG_PATH):$PATH",
-      "trap 'sudo journalctl -u postgresql.service > postgresql_logs.txt' EXIT",
-      "sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD '${var.postgres_password}';\"",
-      "echo 'PostgreSQL password changed'",
-      "sudo -u postgres createdb csye6225",
+      #"trap 'sudo journalctl -u postgresql.service > postgresql_logs.txt' EXIT",
+      #"sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD '${var.postgres_password}';\"",
+      #"echo 'PostgreSQL password changed'",
+      #"sudo -u postgres createdb csye6225",
       "sudo python3.9 -m venv /opt/csye6225/webapp/venv",
       "sudo /usr/bin/pip3.9 install psycopg2-binary==2.9.9",
       "sudo /usr/bin/pip3.9 install -r /opt/csye6225/webapp/requirements.txt",

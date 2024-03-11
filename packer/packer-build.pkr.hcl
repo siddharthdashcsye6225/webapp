@@ -24,7 +24,7 @@ variable "source_image" {
 
 variable "zone" {
   type    = string
-  default = "us-central1-a"
+  default = "us-central1-b"
 }
 
 variable "machine_type" {

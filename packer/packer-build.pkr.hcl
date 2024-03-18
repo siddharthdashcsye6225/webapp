@@ -70,9 +70,11 @@ build {
   }
 
   provisioner "file" {
+
     source      = "packer/config.yaml"
     destination = "/tmp/config.yaml"
   }
+
 
   provisioner "shell" {
     inline = [

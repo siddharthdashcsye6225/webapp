@@ -1,0 +1,23 @@
+logging:
+  receivers:
+    my-app-receiver:
+      type: files
+      include_paths:
+        - /var/log/webapp/*.json
+  processors:
+    my-app-processor:
+      type: parse_json
+  service:
+    pipelines:
+      default_pipeline:
+        receivers: [my-app-receiver]
+        processors: [my-app-processor]
+
+output:
+  googleCloudLogging:
+    resource:
+      type: gce_instance
+    logging:
+      logName: projects/dev-siddharth-dash-csye6225/logs/webapp_logs
+
+

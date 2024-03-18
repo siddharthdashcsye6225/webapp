@@ -69,18 +69,35 @@ build {
     destination = "/tmp/pg_hba.conf.bak"
   }
 
+  provisioner "file" {
+  source      = "packer/config.yaml"
+  destination = "/tmp/config.yaml"
+}
+
   provisioner "shell" {
     inline = [
       "sudo groupadd -f csye6225",
       "sudo useradd -s /sbin/nologin -g csye6225 -d /opt/csye6225 -m csye6225",
       "sudo mv /tmp/webservice.service /etc/systemd/system/",
       "sudo cp /tmp/webapp-1.0.0.tar.gz /opt/csye6225/",
+      "sudo mkdir /etc/google-cloud-ops-agent/",
+      "sudo mv /tmp/config.yaml /etc/google-cloud-ops-agent/config.yaml",
+      "curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh",
+      "sudo bash add-google-cloud-ops-agent-repo.sh --also-install",
+      "sudo systemctl enable google-cloud-ops-agent",
+      "sudo systemctl start google-cloud-ops-agent",
+      "sudo sed -i 's|^output:.*$|output: file:///etc/google-cloud-ops-agent/config.yaml|' /opt/google-cloud-ops-agent/config.yaml",
+      "sudo systemctl restart google-cloud-ops-agent",
+      "sudo systemctl status google-cloud-ops-agent",
       "sudo tar -xzf /opt/csye6225/webapp-1.0.0.tar.gz -C /opt/csye6225/",
       "pwd",
       "sudo ls -ltr /opt/csye6225",
       "sudo cd /opt/csye6225",
       "sudo ls -ltr /opt/csye6225",
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
+      "sudo mkdir /var/log/webapp",
+      "sudo chown -R csye6225:csye6225 /var/log/webapp",
+      "sudo chmod -R 755 /var/log/webapp",
       "sudo yum install -y python39",
       "sudo yum install -y python39-pip",
       "sudo yum install -y python3-devel",

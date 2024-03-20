@@ -42,7 +42,7 @@ def configure_logging():
     if os.getenv('GITHUB_ACTIONS') == 'true' or hostname.endswith('.local'):
         log_file_path = 'myapp_local.log'
     else:
-        log_file_path = '/var/log/webapp.log'
+        log_file_path = '/var/log/webapp/webapp.log'
 
     # Configure file handler
     file_handler = logging.FileHandler(log_file_path)

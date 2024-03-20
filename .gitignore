@@ -6,6 +6,9 @@ __pycache__/
 
 #json file for gcp auth
 dev-siddharth-dash-csye6225-a3631f1ff719.json
+myapp_local.log
+local_webapp.log
+
 
 # Distribution / packaging
 .Python

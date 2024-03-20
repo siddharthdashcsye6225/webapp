@@ -25,10 +25,10 @@ def configure_logging():
     # Application during run time checks if it's running on local machine or on a vm
     # (ONLY WORKS IF HOSTNAME RESOLVES to <XYZ>.local for example in my case Siddharths-MacBook-Air.local
 
-    if hostname.endswith('.local'):
+    if os.getenv('GITHUB_ACTIONS') == 'true' or hostname.endswith('.local'):
         log_file_path = 'myapp_local.log'
     else:
-        log_file_path = '/var/log/myapp.log'
+        log_file_path = '/var/log/webapp.log'
 
     # Configure file handler
     file_handler = logging.FileHandler(log_file_path)

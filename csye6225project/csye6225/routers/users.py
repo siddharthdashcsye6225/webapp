@@ -32,7 +32,7 @@ def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
         print(user)
         if not user:
             raise utils.DataNotFoundException(f"User with email: {id} Not Found!")
-        webapp_logger.info("User retrieved successfully", extra={"user_id": user.id,"taskName": "User Retrieval"})
+        webapp_logger.info("User retrieved successfully", extra={"user_id": user.id})
         return schemas.ResponseUser(
             id=user.id,
             first_name=user.first_name,
@@ -42,7 +42,7 @@ def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
             account_updated=user.updated_at
         )
     except utils.DataNotFoundException as e:
-        webapp_logger.error(f"Failed to retrieve user: {e}",extra={"taskName": "User Retrieval"})
+        webapp_logger.error(f"Failed to retrieve user: {e}")
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         webapp_logger.error(f"Failed to retrieve user: {e}")
@@ -65,21 +65,21 @@ def update_user(updateUser: schemas.UpdateUserData,
 
         if updateUser.username == current_user.username:
             utils.user_service.update_user(updateUser=updateUser, db=db)
-            webapp_logger.info("User updated successfully", extra={"user_id": current_user.id,"taskName": "User Update"})
+            webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
         else:
             raise HTTPException(status_code=400,
                                 detail=f"User with {current_user.username} not authorized to perform requested action "
                                        f"/ not allowed to change username")
 
     except utils.DataNotFoundException as e:
-        webapp_logger.error(f"Failed to update user: {e}",extra={"taskName": "User Update"})
+        webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=404, detail=str(e))
 
     except ValidationError as e:
-        webapp_logger.error(f"Failed to update user: {e}",extra={"taskName": "User Update"})
+        webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400, detail="Invalid request body")
 
     except Exception as e:
-        webapp_logger.error(f"Failed to update user: {e}",extra={"taskName": "User Update"})
+        webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400)
 

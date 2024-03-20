@@ -101,7 +101,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.username == user.username).first()
     if existing_user:
-        webapp_logger.error("Failed to create user: Username already exists", extra={"user_id": existing_user.id,"taskName": "User Creation"})
+        webapp_logger.error("Failed to create user: Username already exists", extra={"user_id": existing_user.id})
         # If the username already exists, raise an HTTPException with status code 400 and an error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
 
@@ -119,7 +119,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    webapp_logger.info("User created successfully", extra={"user_id": new_user.id,"taskName": "User Creation"})
+    webapp_logger.info("User created successfully", extra={"user_id": new_user.id})
 
     return schemas.ResponseUser(
         id=new_user.id,

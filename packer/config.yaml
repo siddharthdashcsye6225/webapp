@@ -3,21 +3,22 @@ logging:
     my-app-receiver:
       type: files
       include_paths:
-        - /var/log/webapp/*.json
+        - /var/log/webapp/webapp.log
   processors:
-    my-app-processor:
+    parse_json:
       type: parse_json
+      field: message
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%L%Z"
+    move_severity:
+      type: modify_fields
+      fields:
+        severity:
+          move_from: jsonPayload.severity
   service:
     pipelines:
       default_pipeline:
         receivers: [my-app-receiver]
-        processors: [my-app-processor]
-
-output:
-  googleCloudLogging:
-    resource:
-      type: gce_instance
-    logging:
-      logName: projects/dev-siddharth-dash-csye6225/logs/webapp_logs
+        processors: [parse_json, move_severity]
 
 

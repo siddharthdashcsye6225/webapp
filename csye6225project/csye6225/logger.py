@@ -24,7 +24,7 @@ class StackdriverJsonFormatter(jsonlogger.JsonFormatter, object):
 def configure_logging():
     # Create logger
     webapp_logger = logging.getLogger(__name__)
-    webapp_logger.setLevel(logging.INFO)
+    webapp_logger.setLevel(logging.DEBUG)
 
     # Configure JSON formatter
     formatter = StackdriverJsonFormatter(datefmt='%Y-%m-%dT%H:%M:%S%z')

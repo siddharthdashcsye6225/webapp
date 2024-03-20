@@ -21,6 +21,8 @@ from sqlalchemy.orm import Session
 import schemas
 from routers import users, health_check
 from routers import users, health_check
+from logger import webapp_logger
+
 
 app = FastAPI()
 
@@ -32,6 +34,7 @@ models.Base.metadata.create_all(bind=engine)
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # error_msg = {"detail": "Validation error", "errors": exc.errors()}
+    webapp_logger.error(f"Request of invalid json body format received: {exc}")
     raise HTTPException(status_code=400)
 
 
@@ -70,6 +73,7 @@ class MethodNotAllowedMiddleware(BaseHTTPMiddleware):
         method = request.method
 
         if path in self.allowed_routes and method not in self.allowed_routes[path]:
+            webapp_logger.error(f"Method not allowed for path '{path}' and method '{method}'")
             response_405 = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
             response_405.headers["Cache-Control"] = "no-cache"
             return response_405

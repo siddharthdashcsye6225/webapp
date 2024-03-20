@@ -18,6 +18,9 @@ from database import engine, SessionLocal, get_db
 from sqlalchemy import create_engine, exc, text
 from sqlalchemy.orm import Session
 import schemas
+from logger import webapp_logger
+
+
 
 router = APIRouter(tags=['public'])
 
@@ -25,17 +28,19 @@ router = APIRouter(tags=['public'])
 @router.get("/healthz", status_code=status.HTTP_200_OK)
 async def healthz(request: Request, db: Session = Depends(get_db)):
     if await request.body() or request.query_params:
+        webapp_logger.error("Invalid request received for healthz endpoint")
         response_400 = Response(status_code=status.HTTP_400_BAD_REQUEST)
         response_400.headers["Cache-Control"] = "no-cache"
         return response_400
     try:
         query = text("SELECT 1")
         db.execute(query)
+        webapp_logger.info("Database connectivity check succeeded")
         response_200 = Response(status_code=status.HTTP_200_OK)
         response_200.headers["Cache-Control"] = "no-cache"
         return response_200
     except Exception as e:
-        print(f"Database connectivity check failed: {e}")
+        webapp_logger.error(f"Database connectivity check failed: {e}")
         response_503 = Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
         response_503.headers["Cache-Control"] = "no-cache"
         return response_503
@@ -43,6 +48,7 @@ async def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.put("/healthz", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("PUT method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -50,6 +56,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/healthz", status_code=405)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("POST method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -57,6 +64,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.delete("/healthz", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("DELETE method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -64,6 +72,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.patch("/healthz", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("PATCH method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -71,6 +80,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.head("/healthz", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("HEAD method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -78,6 +88,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 
 @router.options("/healthz", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 def healthz(request: Request, db: Session = Depends(get_db)):
+    webapp_logger.error("OPTIONS method not allowed for healthz endpoint")
     response = Response(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
     response.headers["Cache-Control"] = "no-cache"
     return response
@@ -90,6 +101,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.username == user.username).first()
     if existing_user:
+        webapp_logger.error("Failed to create user: Username already exists", extra={"user_id": existing_user.id,"taskName": "User Creation"})
         # If the username already exists, raise an HTTPException with status code 400 and an error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
 
@@ -106,6 +118,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    webapp_logger.info("User created successfully", extra={"user_id": new_user.id,"taskName": "User Creation"})
+
     return schemas.ResponseUser(
         id=new_user.id,
         first_name=new_user.first_name,

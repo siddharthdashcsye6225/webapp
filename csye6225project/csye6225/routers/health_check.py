@@ -11,7 +11,7 @@ from starlette import status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-
+import os
 import utils
 import models
 from database import engine, SessionLocal, get_db
@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, exc, text
 from sqlalchemy.orm import Session
 import schemas
 from logger import webapp_logger
-
+import pubsub
 
 
 router = APIRouter(tags=['public'])
@@ -120,6 +120,28 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     webapp_logger.info("User created successfully", extra={"user_id": new_user.id})
+
+    if os.getenv("GITHUB_ACTIONS") == "true" or os.getenv("CI") == "true":
+        webapp_logger.info("Skipping Pub/Sub message publishing because running in GitHub Actions")
+        return schemas.ResponseUser(
+            id=new_user.id,
+            first_name=new_user.first_name,
+            last_name=new_user.last_name,
+            username=new_user.username,
+            account_created=new_user.created_at,
+            account_updated=new_user.updated_at
+        )
+
+        # Publish message to Pub/Sub topic
+    pubsub_message = {
+        "user_id": str(new_user.id),
+        "username": new_user.username,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "created_at": str(new_user.created_at),
+        "updated_at": str(new_user.updated_at)
+    }
+    pubsub.publish_message_to_pubsub("dev-siddharth-dash-csye6225", "verify_email", pubsub_message)
 
     return schemas.ResponseUser(
         id=new_user.id,

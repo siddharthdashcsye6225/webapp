@@ -74,18 +74,9 @@ def update_user(updateUser: schemas.UpdateUserData,
         if invalid_fields:
             raise HTTPException(status_code=400, detail=f"Invalid fields provided: {', '.join(invalid_fields)}")
 
-        # Check if the user is authorized to perform the update
-        if updateUser.username == current_user.username:
-            # Check if the user is verified
-            if current_user.verified:
-                # Update the user
-                utils.user_service.update_user(updateUser=updateUser, db=db)
-                webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
-            else:
-                raise utils.VerificationException("User not verified")
-        else:
-            raise HTTPException(status_code=400,
-                                detail=f"User with {current_user.username} not authorized to perform requested action / not allowed to change username")
+        # Update the user
+        utils.user_service.update_user(updateUser=updateUser, db=db)
+        webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
 
     except utils.VerificationException as e:
         # Handle VerificationException

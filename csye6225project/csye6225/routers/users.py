@@ -43,6 +43,7 @@ def verify_email(verification_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verification link not found")
 
     # Check if the verification link has expired
+
     now = datetime.now(timezone.utc)
     time_difference = now - verification_record.created_at.replace(tzinfo=timezone.utc)
     if time_difference > timedelta(minutes=2):

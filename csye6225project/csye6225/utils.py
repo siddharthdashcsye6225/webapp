@@ -70,28 +70,24 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
     try:
         username = creds.username
         password = creds.password
+
         # Allow requests through if running on GitHub Actions
         if os.getenv("GITHUB_ACTIONS") == "true":
             # Check username and password but skip verification
-            userObj = user_service.get_user_by_email_Id(username=username, db=db)
-            if userObj is not None:
-                if hasattr(userObj, 'password') and verify_password(password, userObj.password):
-                    return userObj
-                else:
-                    raise AuthorizationException("Incorrect email or password")
+            user = user_service.get_user_by_email_Id(username=username, db=db)
+            if user is not None and verify_password(password, user.password):
+                return user
             else:
                 raise AuthorizationException("Incorrect email or password")
         else:
-            userObj = user_service.get_user_by_email_Id(username=username, db=db)
-            if userObj is not None:
-                if hasattr(userObj, 'password') and verify_password(password, userObj.password):
-                    # Check if the user is verified
-                    if userObj.verified:
-                        return userObj
-                    else:
-                        raise VerificationException("User not verified")
+            user = user_service.get_user_by_email_Id(username=username, db=db)
+            if user is not None and verify_password(password, user.password):
+                # Check if the user is verified in the database
+                verification_record = db.query(Verification).filter(Verification.user_id == user.id).first()
+                if verification_record and verification_record.verified:
+                    return user
                 else:
-                    raise AuthorizationException("Incorrect email or password")
+                    raise VerificationException("User not verified")
             else:
                 raise AuthorizationException("Incorrect email or password")
     except (VerificationException, AuthorizationException) as e:

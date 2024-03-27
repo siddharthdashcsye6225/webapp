@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib import response
 
 from fastapi import FastAPI, Body, Depends, HTTPException, Request, APIRouter
@@ -32,6 +32,27 @@ router = APIRouter(tags=['authenticated'])
         raise HTTPException(status_code=401, detail="User not verified or verification link expired")
     return user
 '''
+
+
+# Define a new endpoint for handling verification link clicks
+@router.get("/v1/user/verification/{verification_id}")
+def verify_email(verification_id: str, db: Session = Depends(get_db)):
+    # Retrieve verification record from the database
+    verification_record = db.query(models.Verification).filter(models.Verification.id == verification_id).first()
+    if not verification_record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verification link not found")
+
+    # Check if the verification link has expired
+    time_difference = datetime.now() - verification_record.created_at
+    if time_difference > timedelta(minutes=2):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification link has expired")
+
+    # Update the verification status to True
+    verification_record.verified = True
+    db.commit()
+
+    return {"message": "Email verified successfully"}
+
 
 @router.get('/v1/user/self', response_model=schemas.ResponseUser)
 def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)], db: Session = Depends(get_db)):

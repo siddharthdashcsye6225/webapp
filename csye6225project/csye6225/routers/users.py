@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib import response
 
 from fastapi import FastAPI, Body, Depends, HTTPException, Request, APIRouter
@@ -43,7 +43,9 @@ def verify_email(verification_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verification link not found")
 
     # Check if the verification link has expired
-    time_difference = datetime.now() - verification_record.created_at
+
+    now = datetime.now(timezone.utc)
+    time_difference = now - verification_record.created_at.replace(tzinfo=timezone.utc)
     if time_difference > timedelta(minutes=2):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification link has expired")
 

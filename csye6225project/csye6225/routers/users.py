@@ -25,28 +25,40 @@ router = APIRouter(tags=['authenticated'])
 # Adding comment to test
 # Get back to this later, this function can't figure out which user details to fetch for
 
+
+def verify_user_status(username: str = Depends(utils.get_current_username), db: Session = Depends(SessionLocal)):
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user or not user.is_verified:
+        raise HTTPException(status_code=401, detail="User not verified or verification link expired")
+    return user
+
+
 @router.get('/v1/user/self', response_model=schemas.ResponseUser)
 def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)], db: Session = Depends(get_db)):
     try:
-        user = utils.user_service.get_user_by_email_Id(username=user.username, db=db)
-        print(user)
-        if not user:
+        # Your existing code to retrieve user data
+        user_data = utils.user_service.get_user_by_email_Id(username=user.username, db=db)
+        if not user_data:
             raise utils.DataNotFoundException(f"User with email: {id} Not Found!")
-        webapp_logger.info("User retrieved successfully", extra={"user_id": user.id})
+
+        # Your existing code to return user data
         return schemas.ResponseUser(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            username=user.username,
-            account_created=user.created_at,
-            account_updated=user.updated_at
+            id=user_data.id,
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            username=user_data.username,
+            account_created=user_data.created_at,
+            account_updated=user_data.updated_at
         )
+    except utils.VerificationException as e:
+        # Handle VerificationException
+        raise HTTPException(status_code=403, detail=str(e))
     except utils.DataNotFoundException as e:
-        webapp_logger.error(f"Failed to retrieve user: {e}")
+        # Handle DataNotFoundException
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        webapp_logger.error(f"Failed to retrieve user: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        # Handle other exceptions
+        raise HTTPException(status_code=404, detail="Failed to Retrieve User")
 
 
 @router.put("/v1/user/self", status_code=204)
@@ -54,7 +66,6 @@ def update_user(updateUser: schemas.UpdateUserData,
                 current_user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
                 db: Session = Depends(get_db)):
     try:
-
         # Validate the request body against the Pydantic schema
         updateUser_data = updateUser.model_dump()
         schemas.UpdateUserData(**updateUser_data)
@@ -63,23 +74,34 @@ def update_user(updateUser: schemas.UpdateUserData,
         if invalid_fields:
             raise HTTPException(status_code=400, detail=f"Invalid fields provided: {', '.join(invalid_fields)}")
 
+        # Check if the user is authorized to perform the update
         if updateUser.username == current_user.username:
-            utils.user_service.update_user(updateUser=updateUser, db=db)
-            webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
+            # Check if the user is verified
+            if current_user.verified:
+                # Update the user
+                utils.user_service.update_user(updateUser=updateUser, db=db)
+                webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
+            else:
+                raise utils.VerificationException("User not verified")
         else:
             raise HTTPException(status_code=400,
-                                detail=f"User with {current_user.username} not authorized to perform requested action "
-                                       f"/ not allowed to change username")
+                                detail=f"User with {current_user.username} not authorized to perform requested action / not allowed to change username")
+
+    except utils.VerificationException as e:
+        # Handle VerificationException
+        raise HTTPException(status_code=403, detail=str(e))
 
     except utils.DataNotFoundException as e:
+        # Handle DataNotFoundException
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=404, detail=str(e))
 
     except ValidationError as e:
+        # Handle ValidationError
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400, detail="Invalid request body")
 
     except Exception as e:
+        # Handle other exceptions
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400)
-

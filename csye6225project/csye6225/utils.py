@@ -83,7 +83,8 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
             user = user_service.get_user_by_email_Id(username=username, db=db)
             if user is not None and verify_password(password, user.password):
                 # Check if the user is verified in the database
-                verification_record = db.query(Verification).filter(Verification.user_id == user.id).first()
+
+                verification_record = db.query(models.Verification).filter(models.Verification.email == user.username).first()
                 if verification_record and verification_record.verified:
                     return user
                 else:

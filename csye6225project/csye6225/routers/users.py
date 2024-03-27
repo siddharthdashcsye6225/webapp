@@ -79,33 +79,49 @@ def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
     except utils.DataNotFoundException as e:
         # Handle DataNotFoundException
         raise HTTPException(status_code=404, detail=str(e))
+    except utils.AuthorizationException as e:
+        # Handle AuthorizationException
+        raise HTTPException(status_code=401, detail=str(e))  # Unauthorized
     except Exception as e:
         # Handle other exceptions
-        raise HTTPException(status_code=404, detail="Failed to Retrieve User")
+        raise HTTPException(status_code=500, detail="Failed to Retrieve User")
 
+
+
+from fastapi import HTTPException
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
+from utils import verification, user_service
+from schemas import UpdateUserData, ResponseUser
+import utils
+import schemas
 
 @router.put("/v1/user/self", status_code=204)
-def update_user(updateUser: schemas.UpdateUserData,
-                current_user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
+def update_user(updateUser: UpdateUserData,
+                current_user: Annotated[ResponseUser, Depends(verification)],
                 db: Session = Depends(get_db)):
     try:
         # Validate the request body against the Pydantic schema
         updateUser_data = updateUser.model_dump()
-        schemas.UpdateUserData(**updateUser_data)
+        UpdateUserData(**updateUser_data)
 
         invalid_fields = set(updateUser.model_dump().keys()) - {"first_name", "last_name", "password", "username"}
         if invalid_fields:
             raise HTTPException(status_code=400, detail=f"Invalid fields provided: {', '.join(invalid_fields)}")
 
         # Update the user
-        utils.user_service.update_user(updateUser=updateUser, db=db)
+        user_service.update_user(updateUser=updateUser, db=db)
         webapp_logger.info("User updated successfully", extra={"user_id": current_user.id})
 
-    except utils.VerificationException as e:
+    except verification.VerificationException as e:
         # Handle VerificationException
         raise HTTPException(status_code=403, detail=str(e))
 
-    except utils.DataNotFoundException as e:
+    except user_service.AuthorizationError as e:
+        # Handle AuthorizationError
+        raise HTTPException(status_code=401, detail=str(e))
+
+    except user_service.DataNotFoundException as e:
         # Handle DataNotFoundException
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=404, detail=str(e))
@@ -119,3 +135,4 @@ def update_user(updateUser: schemas.UpdateUserData,
         # Handle other exceptions
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400)
+

@@ -9,7 +9,7 @@ logging:
       type: parse_json
       field: message
       time_key: time
-      time_format: "%Y-%m-%dT%H:%M:%S.%L%Z"
+      time_format: "%Y-%m-%dT%H:%M:%S.%f%z"
     move_severity:
       type: modify_fields
       fields:

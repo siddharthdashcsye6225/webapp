@@ -26,12 +26,12 @@ router = APIRouter(tags=['authenticated'])
 # Get back to this later, this function can't figure out which user details to fetch for
 
 
-def verify_user_status(username: str = Depends(utils.get_current_username), db: Session = Depends(SessionLocal)):
+'''def verify_user_status(username: str = Depends(utils.get_current_username), db: Session = Depends(SessionLocal)):
     user = db.query(models.User).filter(models.User.username == username).first()
     if not user or not user.is_verified:
         raise HTTPException(status_code=401, detail="User not verified or verification link expired")
     return user
-
+'''
 
 @router.get('/v1/user/self', response_model=schemas.ResponseUser)
 def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)], db: Session = Depends(get_db)):

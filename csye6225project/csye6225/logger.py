@@ -1,6 +1,6 @@
 import logging
 import os
-
+import datetime
 from pythonjsonlogger import jsonlogger
 
 
@@ -20,6 +20,11 @@ class StackdriverJsonFormatter(jsonlogger.JsonFormatter, object):
         del log_record['levelname']
         return super(StackdriverJsonFormatter, self).process_log_record(log_record)
 
+    def add_fields(self, log_record, record, message_dict):
+        super(StackdriverJsonFormatter, self).add_fields(log_record, record, message_dict)
+        # Add timestamp field
+        log_record['time'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
 
 def configure_logging():
     # Create logger
@@ -27,7 +32,7 @@ def configure_logging():
     webapp_logger.setLevel(logging.DEBUG)
 
     # Configure JSON formatter
-    formatter = StackdriverJsonFormatter(datefmt='%Y-%m-%dT%H:%M:%S%z')
+    formatter = StackdriverJsonFormatter()
 
     # Configure console handler
     console_handler = logging.StreamHandler()

@@ -64,6 +64,7 @@ def authenticate(credentials: HTTPBasicCredentials = Depends(security), db=Depen
     return user
 
 
+
 def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: Session = Depends(get_db)):
     try:
         username = creds.username
@@ -81,8 +82,7 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
             user = user_service.get_user_by_email_Id(username=username, db=db)
             if user is not None and verify_password(password, user.password):
                 # Check if the user is verified in the database
-                verification_record = db.query(models.Verification).filter(
-                    models.Verification.email == user.username).first()
+                verification_record = db.query(models.Verification).filter(models.Verification.email == user.username).first()
                 if verification_record and verification_record.verified:
                     return user
                 else:
@@ -95,7 +95,6 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
         raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
 
 class userService:
     def get_user_by_email_Id(self, username: str, db: Session) -> Any:

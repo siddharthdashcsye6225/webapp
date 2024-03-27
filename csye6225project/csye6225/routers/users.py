@@ -19,6 +19,13 @@ from sqlalchemy.orm import Session
 import schemas
 from typing import Annotated
 from logger import webapp_logger
+from fastapi import HTTPException
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
+from utils import verification, user_service
+from schemas import UpdateUserData, ResponseUser
+import utils
+import schemas
 
 router = APIRouter(tags=['authenticated'])
 
@@ -57,7 +64,7 @@ def verify_email(verification_id: str, db: Session = Depends(get_db)):
 
 
 @router.get('/v1/user/self', response_model=schemas.ResponseUser)
-def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)], db: Session = Depends(get_db)):
+def get_user(user: schemas.ResponseUser = Depends(utils.verification), db: Session = Depends(get_db)):
     try:
         # Your existing code to retrieve user data
         user_data = utils.user_service.get_user_by_email_Id(username=user.username, db=db)
@@ -87,14 +94,6 @@ def get_user(user: Annotated[schemas.ResponseUser, Depends(utils.verification)],
         raise HTTPException(status_code=500, detail="Failed to Retrieve User")
 
 
-
-from fastapi import HTTPException
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
-from utils import verification, user_service
-from schemas import UpdateUserData, ResponseUser
-import utils
-import schemas
 
 @router.put("/v1/user/self", status_code=204)
 def update_user(updateUser: UpdateUserData,
@@ -135,4 +134,3 @@ def update_user(updateUser: UpdateUserData,
         # Handle other exceptions
         webapp_logger.error(f"Failed to update user: {e}")
         raise HTTPException(status_code=400)
-

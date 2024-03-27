@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
+import os
 
 security = HTTPBasic()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -63,9 +64,6 @@ def authenticate(credentials: HTTPBasicCredentials = Depends(security), db=Depen
     return user
 
 
-import os
-
-
 def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: Session = Depends(get_db)):
     try:
         username = creds.username
@@ -83,18 +81,19 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
             user = user_service.get_user_by_email_Id(username=username, db=db)
             if user is not None and verify_password(password, user.password):
                 # Check if the user is verified in the database
-
-                verification_record = db.query(models.Verification).filter(models.Verification.email == user.username).first()
+                verification_record = db.query(models.Verification).filter(
+                    models.Verification.email == user.username).first()
                 if verification_record and verification_record.verified:
                     return user
                 else:
                     raise VerificationException("User not verified")
             else:
                 raise AuthorizationException("Incorrect email or password")
-    except (VerificationException, AuthorizationException) as e:
-        raise e
+    except VerificationException as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except AuthorizationException as e:
+        raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
-        print("Auth exception", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 

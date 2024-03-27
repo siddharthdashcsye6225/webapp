@@ -45,6 +45,12 @@ class UserAlreadyExistsException(Exception):
         super().__init__(self.message)
 
 
+class VerificationException(Exception):
+    def __init__(self, message="User verification failed"):
+        self.message = message
+        super().__init__(self.message)
+
+
 # authenticate function first checks if username exists and then checks pass, if all good it returns the user
 def authenticate(credentials: HTTPBasicCredentials = Depends(security), db=Depends(get_db)):
     user = db.query(User).filter(User.username == credentials.username).first()
@@ -64,16 +70,21 @@ def verification(creds: Annotated[HTTPBasicCredentials, Depends(security)], db: 
         userObj = user_service.get_user_by_email_Id(username=username, db=db)
         if userObj is not None:
             if hasattr(userObj, 'password') and verify_password(password, userObj.password):
-                return userObj
+                # Check if the user is verified
+                if userObj.verified:
+                    return userObj
+                else:
+                    raise VerificationException("User not verified")
             else:
                 raise AuthorizationException("Incorrect email or password")
         else:
             raise AuthorizationException("Incorrect email or password")
-    except AuthorizationException as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    except (VerificationException, AuthorizationException) as e:
+        raise e
     except Exception as e:
         print("Auth exception", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 
 class userService:

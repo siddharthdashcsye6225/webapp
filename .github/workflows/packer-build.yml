@@ -15,6 +15,7 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
+        INSTANCE_TEMPLATE_NAME: webapp-instance-template-$(date +%Y%m%d-%H%M%S)
 
     steps:
       - name: Checkout code
@@ -92,8 +93,61 @@ jobs:
           fi
 
       - name: Build Image with Packer Template
-        run: | 
+        run: |
           pwd
-          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl
+          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl | tee output.txt
+          export IMAGE_ID=$(cat output.txt | jq -r '.builds[-1].artifact_id' | cut -d ':' -f2)
+          echo "Latest Packer image ID: $IMAGE_ID"
+        shell: bash
 
-#test
+      - name: Create Instance Template
+        run: |
+          gcloud beta compute instance-templates create $INSTANCE_TEMPLATE_NAME \
+            --project=dev-siddharth-dash-csye6225 \
+            --description="WebApp Regional Compute Instance Template" \
+            --machine-type=e2-medium \
+            --network-interface=network-tier=PREMIUM,subnet=webapp \
+            --instance-template-region=projects/dev-siddharth-dash-csye6225/regions/us-central1 \
+            --metadata="startup-script=#!/bin/bash$'\n'export DB_HOST=\"${{ secrets.DB_HOST_SQL_INSTANCE }}\"$'\n'export DB_USER=\"webapp\"$'\n'export DB_PASS=\"${{ secrets.DB_PASS_SQL_INSTANCE }}\"$'\n'export DB_NAME=\"webapp\"$'\n'$'\n'echo \"SQLALCHEMY_DATABASE_URL=postgresql://\$DB_USER:\$DB_PASS@\$DB_HOST/\$DB_NAME\" > /tmp/database_url.ini$'\n'touch /tmp/endofstartupscript.txt$'\n'chmod 777 /tmp/endofstartupscript.txt$'\n'systemctl daemon-reload$'\n'systemctl start webservice.service$'\n'systemctl enable webservice.service$'\n" \
+            --maintenance-policy=MIGRATE \
+            --maintenance-policy=MIGRATE \
+            --provisioning-model=STANDARD \
+            --service-account=webapp-service-account@dev-siddharth-dash-csye6225.iam.gserviceaccount.com \
+            --scopes=https://www.googleapis.com/auth/pubsub,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.read \
+            --region=us-central1 \
+            --tags=webapp-vm \
+            --create-disk=auto-delete=yes,boot=yes,device-name=persistent-disk-0,image=projects/dev-siddharth-dash-csye6225/global/images/$IMAGE_ID,kms-key=projects/dev-siddharth-dash-csye6225/locations/us-central1/keyRings/webapp-key-ring-9c186c9e/cryptoKeys/vm-crypto-key,mode=rw,size=100,type=pd-standard, \
+            --no-shielded-secure-boot \
+            --shielded-vtpm \
+            --shielded-integrity-monitoring \
+            --reservation-affinity=any
+
+      - name: Configure Managed Instance Group
+        run: |
+          gcloud compute instance-groups managed set-instance-template webapp-instance-group \
+            --template=$INSTANCE_TEMPLATE_NAME \
+            --region=us-central1 \
+            --project=dev-siddharth-dash-csye6225
+
+      - name: Start Rolling Update
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update webapp-instance-group \
+            --version=template=$INSTANCE_TEMPLATE_NAME \
+            --region=us-central1 \
+            --project=dev-siddharth-dash-csye6225   
+
+      - name: Wait for Rolling Update to Complete
+        run: |
+          while true; do
+            STATUS=$(gcloud compute instance-groups managed describe mig-webapp --region=us-central1 --format="value(status)" | awk -F "isReached=" '{print $2}' | awk '{print $1}')
+            if [ "$STATUS" = "True" ]; then
+              echo "Rolling Update completed successfully."
+              break
+            elif [ "$STATUS" = "UNKNOWN" ]; then
+              echo "Error: Rolling Update failed or encountered an unknown status."
+              exit 1
+            else
+              echo "Waiting for Rolling Update to complete. Current status: $STATUS"
+              sleep 30
+            fi
+          done    

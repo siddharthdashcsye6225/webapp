@@ -107,7 +107,7 @@ jobs:
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
             --network-interface=network-tier=PREMIUM,subnet=webapp \
-            --instance-us-central1 \
+            --instance-template-region=us-central1 \
             --metadata="startup-script=#!/bin/bash$'\n'export DB_HOST=\"${{ secrets.DB_HOST_SQL_INSTANCE }}\"$'\n'export DB_USER=\"webapp\"$'\n'export DB_PASS=\"${{ secrets.DB_PASS_SQL_INSTANCE }}\"$'\n'export DB_NAME=\"webapp\"$'\n'$'\n'echo \"SQLALCHEMY_DATABASE_URL=postgresql://\$DB_USER:\$DB_PASS@\$DB_HOST/\$DB_NAME\" > /tmp/database_url.ini$'\n'touch /tmp/endofstartupscript.txt$'\n'chmod 777 /tmp/endofstartupscript.txt$'\n'systemctl daemon-reload$'\n'systemctl start webservice.service$'\n'systemctl enable webservice.service$'\n" \
             --maintenance-policy=MIGRATE \
             --maintenance-policy=MIGRATE \

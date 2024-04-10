@@ -15,7 +15,7 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
-        INSTANCE_TEMPLATE_NAME: "webapp-instance-template-$(uuidgen)"
+        INSTANCE_TEMPLATE_NAME: "webapp-instance-template-$(LC_CTYPE=C tr -dc 'a-z' < /dev/urandom | head -c 10)"
 
     steps:
       - name: Checkout code

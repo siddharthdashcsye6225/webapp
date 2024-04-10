@@ -16,6 +16,7 @@ jobs:
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
         INSTANCE_TEMPLATE_NAME: ${{ secrets.TEMPLATE_INSTANCE_NAME }}
+        METADATA_SCRIPT: ${{ secrets.METADATA_SCRIPT }}
 
     steps:
       - name: Checkout code
@@ -102,13 +103,13 @@ jobs:
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
-          gcloud compute instance-templates create webapp-instance-template-20240410-051247 \
+          gcloud compute instance-templates create webapp-instance-template-20240410-051248 \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
             --network-interface=network-tier=PREMIUM,subnet=webapp \
             --instance-template-region=us-central1 \
-            --metadata="startup-script=#!/bin/bash$'\n'export DB_HOST=\"${{ secrets.DB_HOST_SQL_INSTANCE }}\"$'\n'export DB_USER=\"webapp\"$'\n'export DB_PASS=\"${{ secrets.DB_PASS_SQL_INSTANCE }}\"$'\n'export DB_NAME=\"webapp\"$'\n'$'\n'echo \"SQLALCHEMY_DATABASE_URL=postgresql://\$DB_USER:\$DB_PASS@\$DB_HOST/\$DB_NAME\" > /tmp/database_url.ini$'\n'touch /tmp/endofstartupscript.txt$'\n'chmod 777 /tmp/endofstartupscript.txt$'\n'systemctl daemon-reload$'\n'systemctl start webservice.service$'\n'systemctl enable webservice.service$'\n" \
+            --metadata=startup-script="${METADATA_SCRIPT}" \
             --maintenance-policy=MIGRATE \
             --maintenance-policy=MIGRATE \
             --provisioning-model=STANDARD \
@@ -132,9 +133,15 @@ jobs:
       - name: Start Rolling Update
         run: |
           gcloud compute instance-groups managed rolling-action start-update mig-webapp \
-            --version='template=webapp-instance-template-20240410-051247' \
+            --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051248' \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225   
+            --type='proactive'
+            --max-surge=3
+            --max-unavailable=3
+            --minimal-action='replace'
+            --most-disruptive-allowed-action='replace'
+            --replacement-method='substitute'
 
       - name: Wait for Rolling Update to Complete
         run: |

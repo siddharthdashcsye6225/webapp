@@ -103,7 +103,7 @@ jobs:
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
-          gcloud compute instance-templates create webapp-instance-template-20240410-051251 \
+          gcloud compute instance-templates create webapp-instance-template-20240410-051252 \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
@@ -133,7 +133,7 @@ jobs:
       - name: Start Rolling Update
         run: |
           gcloud compute instance-groups managed rolling-action start-update mig-webapp \
-            --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051251' \
+            --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051252' \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225 \
             --max-unavailable=3 \

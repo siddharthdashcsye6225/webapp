@@ -96,15 +96,11 @@ jobs:
           pwd
           packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl 
 
-      - name: Generate Timestamp
-        id: timestamp
-        run: echo "::set-output name=timestamp::$$(date +%Y%m%d-%H%M%S)"
-
       - name: Create Instance Template
         run: |
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
-          INSTANCE_TEMPLATE_NAME="webapp-instance-template-${{ steps.timestamp.outputs.timestamp }}"
+          INSTANCE_TEMPLATE_NAME= ${{ secrets.TEMPLATE_INSTANCE_NAME }}
           echo "Instance Template Name: $INSTANCE_TEMPLATE_NAME"
           gcloud compute instance-templates create $INSTANCE_TEMPLATE_NAME \
             --project=dev-siddharth-dash-csye6225 \

@@ -92,16 +92,15 @@ jobs:
             exit 1
           fi
 
-      - name: Build Image with Packer Template
-        run: |
-          pwd
-          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl 
+#      - name: Build Image with Packer Template
+#        run: |
+#          pwd
+#          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl
 
       - name: Create Instance Template
         run: |
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
-
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
           gcloud compute instance-templates create webapp-instance-template-20240410-051244 \
             --project=dev-siddharth-dash-csye6225 \
@@ -122,7 +121,6 @@ jobs:
             --shielded-vtpm \
             --shielded-integrity-monitoring \
             --reservation-affinity=any
-            --quiet
 
       - name: Configure Managed Instance Group
         run: |

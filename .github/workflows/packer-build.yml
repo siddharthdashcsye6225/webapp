@@ -92,18 +92,20 @@ jobs:
             exit 1
           fi
 
-      - name: Build Image with Packer Template
-        run: |
-          pwd
-          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl 
+#      - name: Build Image with Packer Template
+#        run: |
+#          pwd
+#          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl
 
       - name: Create Instance Template
         run: |
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
+          random_string=$(openssl rand -hex 3)
+          instance_template_name_test="${{ secrets.TEMPLATE_INSTANCE_NAME }}-${random_string}"
 
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
-          gcloud compute instance-templates create ${{ env.INSTANCE_TEMPLATE_NAME }} \
+          gcloud compute instance-templates create $instance_template_name_test} \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
@@ -122,19 +124,18 @@ jobs:
             --shielded-vtpm \
             --shielded-integrity-monitoring \
             --reservation-affinity=any
-            --quiet
 
       - name: Configure Managed Instance Group
         run: |
           gcloud compute instance-groups managed set-instance-template mig-webapp \
-            --template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+            --template=$instance_template_name_test \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225
 
       - name: Start Rolling Update
         run: |
           gcloud compute instance-groups managed rolling-action start-update mig-webapp \
-            --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+            --version=template=$instance_template_name_test \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225   
 

@@ -15,7 +15,6 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
-        INSTANCE_TEMPLATE_NAME: "webapp-instance-template-$(LC_CTYPE=C tr -dc 'a-z' < /dev/urandom | head -c 10)"
 
     steps:
       - name: Checkout code
@@ -95,13 +94,18 @@ jobs:
       - name: Build Image with Packer Template
         run: |
           pwd
-          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl | tee output.txt
-          export IMAGE_ID=$(cat output.txt | jq -r '.builds[-1].artifact_id' | cut -d ':' -f2)
-          echo "Latest Packer image ID: $IMAGE_ID"
-        shell: bash
+          packer build -var 'postgres_password=${{ env.POSTGRES_PASSWORD }}' packer/packer-build.pkr.hcl 
+
+      - name: Generate Timestamp
+        id: timestamp
+        run: echo "::set-output name=timestamp::$$(date +%Y%m%d-%H%M%S)"
 
       - name: Create Instance Template
         run: |
+          IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
+          echo "$IMAGE_ID"
+          INSTANCE_TEMPLATE_NAME="webapp-instance-template-${{ steps.timestamp.outputs.timestamp }}"
+          echo "Instance Template Name: $INSTANCE_TEMPLATE_NAME"
           gcloud compute instance-templates create $INSTANCE_TEMPLATE_NAME \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \

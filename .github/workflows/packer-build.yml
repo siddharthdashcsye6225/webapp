@@ -137,6 +137,7 @@ jobs:
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225 \
             --max-unavailable=3 \
+            --max-surge=3 \
             --type='proactive' \
             --minimal-action='replace' \
             --most-disruptive-allowed-action='replace' \

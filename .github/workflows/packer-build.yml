@@ -121,6 +121,7 @@ jobs:
             --shielded-vtpm \
             --shielded-integrity-monitoring \
             --reservation-affinity=any
+            --quiet
 
       - name: Configure Managed Instance Group
         run: |

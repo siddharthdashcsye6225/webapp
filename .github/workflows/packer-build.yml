@@ -103,7 +103,7 @@ jobs:
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
-          gcloud compute instance-templates create webapp-instance-template-20240410-051250 \
+          gcloud compute instance-templates create webapp-instance-template-20240410-051251 \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
@@ -133,28 +133,26 @@ jobs:
       - name: Start Rolling Update
         run: |
           gcloud compute instance-groups managed rolling-action start-update mig-webapp \
-            --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051250' \
+            --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051251' \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225 \
-            --max-surge=3 \
-            --max-unavailable=3 \
-            --minimal-action='replace' \
+            --max-unavailable=1 \
             --type='proactive' \
+            --minimal-action='replace' \
             --most-disruptive-allowed-action='replace' \
             --replacement-method='substitute'
 
       - name: Wait for Rolling Update to Complete
         run: |
           while true; do
-            STATUS=$(gcloud compute instance-groups managed describe mig-webapp --region=us-central1 --format="value(status)" | awk -F "isReached=" '{print $2}' | awk '{print $1}')
-            if [ "$STATUS" = "True" ]; then
+            STATUS=$(gcloud compute instance-groups managed describe mig-webapp --region=us-central1 --format="value(status)" | grep '"isReached": True')
+            if [[ $? -eq 0 ]]; then
               echo "Rolling Update completed successfully."
               break
-            elif [ "$STATUS" = "UNKNOWN" ]; then
+            elif [[ $? -gt 0 ]]; then
               echo "Error: Rolling Update failed or encountered an unknown status."
               exit 1
-            else
-              echo "Waiting for Rolling Update to complete. Current status: $STATUS"
-              sleep 30
             fi
-          done    
+            echo "Waiting for Rolling Update to complete..."
+            sleep 30
+          done 

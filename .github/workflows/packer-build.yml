@@ -102,7 +102,7 @@ jobs:
 
       - name: Create Instance Template
         run: |
-          gcloud beta compute instance-templates create $INSTANCE_TEMPLATE_NAME \
+          gcloud compute instance-templates create $INSTANCE_TEMPLATE_NAME \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \

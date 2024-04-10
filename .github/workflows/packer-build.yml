@@ -101,9 +101,6 @@ jobs:
         run: |
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
-          random_string=$(openssl rand -hex 3)
-          instance_template_name_test="${{ secrets.TEMPLATE_INSTANCE_NAME }}-${random_string}"
-
           echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
           gcloud compute instance-templates create $instance_template_name_test} \
             --project=dev-siddharth-dash-csye6225 \

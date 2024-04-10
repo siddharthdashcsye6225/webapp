@@ -15,7 +15,7 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
-        INSTANCE_TEMPLATE_NAME: webapp-instance-template-$(date +%Y%m%d-%H%M%S)
+        INSTANCE_TEMPLATE_NAME: "webapp-instance-template-$(uuidgen)"
 
     steps:
       - name: Checkout code
@@ -125,14 +125,14 @@ jobs:
 
       - name: Configure Managed Instance Group
         run: |
-          gcloud compute instance-groups managed set-instance-template webapp-instance-group \
+          gcloud compute instance-groups managed set-instance-template mig-webapp \
             --template=$INSTANCE_TEMPLATE_NAME \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225
 
       - name: Start Rolling Update
         run: |
-          gcloud compute instance-groups managed rolling-action start-update webapp-instance-group \
+          gcloud compute instance-groups managed rolling-action start-update mig-webapp \
             --version=template=$INSTANCE_TEMPLATE_NAME \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225   

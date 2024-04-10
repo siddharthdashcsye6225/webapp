@@ -136,7 +136,7 @@ jobs:
             --version='template=projects/dev-siddharth-dash-csye6225/regions/us-central1/instanceTemplates/webapp-instance-template-20240410-051253' \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225 \
-            --max-unavailable=3 \
+            --max-unavailable=2 \
             --type='proactive' \
             --minimal-action='replace' \
             --most-disruptive-allowed-action='replace' \

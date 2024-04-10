@@ -15,6 +15,7 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: csye6225
+        INSTANCE_TEMPLATE_NAME: ${{ secrets.TEMPLATE_INSTANCE_NAME }}
 
     steps:
       - name: Checkout code
@@ -100,9 +101,9 @@ jobs:
         run: |
           IMAGE_ID=$(gcloud compute images list --sort-by=~creationTimestamp --format='value(NAME)' --limit=1)
           echo "$IMAGE_ID"
-          INSTANCE_TEMPLATE_NAME= ${{ secrets.TEMPLATE_INSTANCE_NAME }}
-          echo "Instance Template Name: $INSTANCE_TEMPLATE_NAME"
-          gcloud compute instance-templates create $INSTANCE_TEMPLATE_NAME \
+
+          echo "Instance Template Name: ${{ env.INSTANCE_TEMPLATE_NAME }}:"
+          gcloud compute instance-templates create ${{ env.INSTANCE_TEMPLATE_NAME }} \
             --project=dev-siddharth-dash-csye6225 \
             --description="WebApp Regional Compute Instance Template" \
             --machine-type=e2-medium \
@@ -126,14 +127,14 @@ jobs:
       - name: Configure Managed Instance Group
         run: |
           gcloud compute instance-groups managed set-instance-template mig-webapp \
-            --template=$INSTANCE_TEMPLATE_NAME \
+            --template=${{ env.INSTANCE_TEMPLATE_NAME }} \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225
 
       - name: Start Rolling Update
         run: |
           gcloud compute instance-groups managed rolling-action start-update mig-webapp \
-            --version=template=$INSTANCE_TEMPLATE_NAME \
+            --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
             --region=us-central1 \
             --project=dev-siddharth-dash-csye6225   
 

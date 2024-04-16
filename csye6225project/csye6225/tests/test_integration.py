@@ -23,7 +23,7 @@ def test_user_lifecycle():
         "username": "johndoe1111@example.com",
         "password": "password123"
     }
-    response = client.post("/v1/user", json=new_user_data)
+    response = client.post("/v2/user", json=new_user_data)
     assert response.status_code == 201
     created_user = response.json()
     assert created_user["first_name"] == new_user_data["first_name"]
@@ -32,7 +32,7 @@ def test_user_lifecycle():
     #assert "password" in created_user
 
     # Test getting user details
-    response = client.get("/v1/user/self", headers={"Authorization": auth_header})
+    response = client.get("/v2/user/self", headers={"Authorization": auth_header})
     assert response.status_code == 200
     retrieved_user = response.json()
     assert retrieved_user["first_name"] == new_user_data["first_name"]
@@ -46,7 +46,7 @@ def test_user_lifecycle():
         "password": "newpassword123",
         "username": "johndoe1111@example.com"
     }
-    response = client.put("/v1/user/self", json=updated_user_data, headers={"Authorization": auth_header})
+    response = client.put("/v2/user/self", json=updated_user_data, headers={"Authorization": auth_header})
     assert response.status_code == 204
 
     # Update the password in the auth_header
@@ -56,7 +56,7 @@ def test_user_lifecycle():
     updated_auth_header = f"Basic {updated_encoded_credentials}"
 
     # Verify the user details were updated
-    updated_response = client.get("/v1/user/self", headers={"Authorization": updated_auth_header})
+    updated_response = client.get("/v2/user/self", headers={"Authorization": updated_auth_header})
     assert updated_response.status_code == 200
     updated_user = updated_response.json()
     assert updated_user["first_name"] == updated_user_data["first_name"]

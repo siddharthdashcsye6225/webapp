@@ -97,7 +97,7 @@ def healthz(request: Request, db: Session = Depends(get_db)):
 # USER CREATION
 #
 # FOR NOW THIS CODE IGNORES RANDOM FIELD AND CREATES USERS ANYWAYS
-@router.post("/v1/user", status_code=status.HTTP_201_CREATED, response_model=schemas.ResponseUser)
+@router.post("/v2/user", status_code=status.HTTP_201_CREATED, response_model=schemas.ResponseUser)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.username == user.username).first()
     if existing_user:

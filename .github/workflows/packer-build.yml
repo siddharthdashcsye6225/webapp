@@ -117,7 +117,7 @@ jobs:
             --scopes=https://www.googleapis.com/auth/pubsub,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.read \
             --region=us-central1 \
             --tags=webapp-vm \
-            --create-disk=auto-delete=yes,boot=yes,device-name=persistent-disk-0,image=projects/dev-siddharth-dash-csye6225/global/images/$IMAGE_ID,kms-key=projects/dev-siddharth-dash-csye6225/locations/us-central1/keyRings/webapp-key-ring-9c186c9e/cryptoKeys/vm-crypto-key,mode=rw,size=100,type=pd-standard, \
+            --create-disk=auto-delete=yes,boot=yes,device-name=persistent-disk-0,image=projects/dev-siddharth-dash-csye6225/global/images/$IMAGE_ID,kms-key=projects/dev-siddharth-dash-csye6225/locations/us-central1/keyRings/webapp-key-ring-cddea752/cryptoKeys/vm-crypto-key,mode=rw,size=100,type=pd-standard, \
             --no-shielded-secure-boot \
             --shielded-vtpm \
             --shielded-integrity-monitoring \

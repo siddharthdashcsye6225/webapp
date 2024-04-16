@@ -39,8 +39,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 allowed_routes = {
-    "/v1/user/self": ["GET", "PUT"],
-    "/v1/user": ["POST"],
+    "/v2/user/self": ["GET", "PUT"],
+    "/v2/user": ["POST"],
     "/healthz": ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
 }
 

@@ -42,7 +42,7 @@ router = APIRouter(tags=['authenticated'])
 
 
 # Define a new endpoint for handling verification link clicks
-@router.get("/v1/user/verification/{verification_id}")
+@router.get("/v2/user/verification/{verification_id}")
 def verify_email(verification_id: str, db: Session = Depends(get_db)):
     # Retrieve verification record from the database
     verification_record = db.query(models.Verification).filter(models.Verification.id == verification_id).first()
@@ -63,7 +63,7 @@ def verify_email(verification_id: str, db: Session = Depends(get_db)):
     return {"message": "Email verified successfully"}
 
 
-@router.get('/v1/user/self', response_model=schemas.ResponseUser)
+@router.get('/v2/user/self', response_model=schemas.ResponseUser)
 def get_user(user: schemas.ResponseUser = Depends(utils.verification), db: Session = Depends(get_db)):
     try:
         # Your existing code to retrieve user data
@@ -95,7 +95,7 @@ def get_user(user: schemas.ResponseUser = Depends(utils.verification), db: Sessi
 
 
 
-@router.put("/v1/user/self", status_code=204)
+@router.put("/v2/user/self", status_code=204)
 def update_user(updateUser: UpdateUserData,
                 current_user: Annotated[ResponseUser, Depends(verification)],
                 db: Session = Depends(get_db)):
